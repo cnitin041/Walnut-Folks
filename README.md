@@ -66,6 +66,32 @@ The account balance is a cached aggregate. The immutable transaction ledger is t
 
 Docker is optional. The repository includes a local-cluster path and a Docker Compose path; use whichever is available.
 
+### If PostgreSQL is not installed (Windows)
+
+Install PostgreSQL 18 with `winget`:
+
+```powershell
+winget install --id PostgreSQL.PostgreSQL.18 -e
+```
+
+Or download the EDB installer with `wget` and run it:
+
+```powershell
+wget "https://get.enterprisedb.com/postgresql/postgresql-18.6-5-windows-x64.exe" -OutFile "$env:TEMP\postgresql-18-installer.exe"
+Start-Process "$env:TEMP\postgresql-18-installer.exe" -Wait
+```
+
+PowerShell 5.1 aliases `wget` to `Invoke-WebRequest`, so the command above works without installing `wget`. In PowerShell 7, use `Invoke-WebRequest -Uri <url> -OutFile <path>`; in Git Bash with native `wget`, use `wget -O postgresql-18-installer.exe <url>`. Replace `18.6-5` with the current 18.x build from the [EDB download page](https://www.enterprisedb.com/downloads/postgres-postgresql-downloads).
+
+Verify the installation and set `PG_BIN` if you installed to a non-default location:
+
+```powershell
+& "C:\Program Files\PostgreSQL\18\bin\psql.exe" --version
+$env:PG_BIN = "C:\Program Files\PostgreSQL\18\bin"
+```
+
+If you cannot install PostgreSQL locally, use the [Docker PostgreSQL](#quick-start-docker-postgresql) path instead.
+
 ## Quick Start (Windows, local PostgreSQL)
 
 1. Create and activate a virtual environment:
@@ -75,12 +101,36 @@ Docker is optional. The repository includes a local-cluster path and a Docker Co
    .\.venv\Scripts\Activate.ps1
    ```
 
+   If the `py` launcher is unavailable, use `python` instead:
+
+   ```powershell
+   python -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+   ```
+
+   If PowerShell blocks the activation script, bypass the execution policy for that command:
+
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File .\.venv\Scripts\Activate.ps1
+   ```
+
+   Or allow scripts for the current shell session only:
+
+   ```powershell
+   Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+   .\.venv\Scripts\Activate.ps1
+   ```
+
+   On `cmd.exe`, use `.\.venv\Scripts\activate.bat`. In Git Bash, use `source .venv/Scripts/activate`.
+
 2. Install dependencies:
 
    ```powershell
    .\.venv\Scripts\python.exe -m pip install --upgrade pip
    .\.venv\Scripts\python.exe -m pip install -r requirements.txt
    ```
+
+   After activation, every `.\.venv\Scripts\<tool>.exe` command below can be replaced with `python -m <tool>` (for example, `python -m pytest`, `python -m alembic`, `python -m uvicorn`, or `python -m ruff`).
 
 3. Create the environment file:
 
@@ -92,6 +142,12 @@ Docker is optional. The repository includes a local-cluster path and a Docker Co
 
    ```powershell
    .\scripts\db.ps1 init
+   ```
+
+   If PowerShell blocks the script, run it with an execution-policy bypass:
+
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File .\scripts\db.ps1 init
    ```
 
    If the cluster already exists:
@@ -131,6 +187,12 @@ Docker is optional. The repository includes a local-cluster path and a Docker Co
 
    ```powershell
    .\.venv\Scripts\uvicorn.exe app.main:app --reload --host 127.0.0.1 --port 8000
+   ```
+
+   Or, with the virtual environment activated:
+
+   ```powershell
+   python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
    ```
 
 7. Open Swagger UI at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) or ReDoc at [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc).
@@ -182,6 +244,14 @@ Never commit `.env` or real credentials. `.env` and `.pgdata/` are ignored by Gi
 .\.venv\Scripts\alembic.exe downgrade -1
 ```
 
+With the virtual environment activated, the same commands are:
+
+```powershell
+python -m alembic upgrade head
+python -m alembic current
+python -m alembic downgrade -1
+```
+
 The initial migration creates `accounts`, `transfers`, and `transactions` with checks, foreign keys, indexes, and unique constraints. `create_all()` is not used as the schema strategy.
 
 ## Running Tests
@@ -192,11 +262,24 @@ The test suite requires PostgreSQL and uses `TEST_DATABASE_URL`. It applies migr
 .\.venv\Scripts\pytest.exe
 ```
 
+Or, with the virtual environment activated:
+
+```powershell
+python -m pytest
+```
+
 Run lint and formatting checks:
 
 ```powershell
 .\.venv\Scripts\ruff.exe check app tests migrations
 .\.venv\Scripts\ruff.exe format --check app tests migrations
+```
+
+Or, with the virtual environment activated:
+
+```powershell
+python -m ruff check app tests migrations
+python -m ruff format --check app tests migrations
 ```
 
 The tests cover accounts, credits, debits, overdrafts, validation, duplicate references, history filtering/pagination/sorting, rollback on simulated failures, concurrent duplicate submissions, concurrent overdrafts, concurrent transfers, duplicate transfers, and balance/ledger consistency.
