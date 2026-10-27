@@ -2,6 +2,14 @@
 
 Runnable `curl` examples for every endpoint in the Transaction Ledger API.
 
+Interactive FastAPI documentation is available while the app is running:
+
+| Interface | URL |
+| --- | --- |
+| Swagger UI | [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) |
+| ReDoc | [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc) |
+| OpenAPI JSON | [http://127.0.0.1:8000/openapi.json](http://127.0.0.1:8000/openapi.json) |
+
 ## Base URL and Variables
 
 Start the API first:

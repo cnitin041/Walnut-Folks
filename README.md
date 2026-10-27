@@ -201,6 +201,18 @@ Run lint and formatting checks:
 
 The tests cover accounts, credits, debits, overdrafts, validation, duplicate references, history filtering/pagination/sorting, rollback on simulated failures, concurrent duplicate submissions, concurrent overdrafts, concurrent transfers, duplicate transfers, and balance/ledger consistency.
 
+## Interactive API Documentation
+
+Once the application is running, FastAPI serves interactive API documentation:
+
+| Interface | URL |
+| --- | --- |
+| Swagger UI | [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) |
+| ReDoc | [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc) |
+| OpenAPI JSON | [http://127.0.0.1:8000/openapi.json](http://127.0.0.1:8000/openapi.json) |
+
+Swagger UI supports trying requests directly from the browser. The OpenAPI schema includes request bodies, response models, status codes, error responses, and examples.
+
 ## API Endpoints
 
 All business endpoints are under `/api/v1`.
